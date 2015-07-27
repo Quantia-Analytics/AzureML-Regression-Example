@@ -1,22 +1,23 @@
 ## This code will create a series of data visualizations
 ## to explore the bike rental dataset. This code is 
 ## intended to run in an Azure ML Execute R 
-## Script module. By changing some comments you can 
-## test the code in RStudio.
+## Script module. By changing the following variable
+## you can run the code in R or RStudio for testing.
+Azure <- FALSE
 
-## Source the zipped utility file
-source("src/utilities.R")
+if(Azure){
+  ## Sourcethe zipped utility file
+  source("src/utilities.R")
+  ## Read in the dataset. 
+  BikeShare <- maml.mapInputPort(1)
+  BikeShare$dteday <- set.asPOSIXct2(BikeShare)
+}
 
-## Read in the dataset. 
-BikeShare <- maml.mapInputPort(1)
-
-## Extract the date in character format 
-BikeShare$dteday <- get.date(BikeShare$dteday)
 
 ## Look at the correlation between the predictors and 
 ## between predictors and quality. Use a linear 
 ## time series regression to detrend the demand.
-Time <- POSIX.date(BikeShare$dteday, BikeShare$hr)
+Time <- BikeShare$dteday
 BikeShare$count <- BikeShare$cnt - fitted(
   lm(BikeShare$cnt ~ Time, data = BikeShare))
 cor.BikeShare.all <- cor(BikeShare[, c("mnth", 
@@ -32,27 +33,30 @@ cor.BikeShare.all <- cor(BikeShare[, c("mnth",
 
 diag(cor.BikeShare.all) <- 0.0 
 cor.BikeShare.all
-library(lattice)
+require(lattice)
 plot( levelplot(cor.BikeShare.all, 
         main ="Correlation matrix for all bike users",
         scales=list(x=list(rot=90), cex=1.0)) )
 
 ## Make time series plots for certain hours of the day
+require(ggplot2)
 times <- c(7, 9, 12, 15, 18, 20, 22)
-lapply(times, function(x){
-       plot(Time[BikeShare$hr == x], 
-            BikeShare$cnt[BikeShare$hr == x], 
-            type = "l", xlab = "Date", 
-            ylab = "Number of bikes used",
-            main = paste("Bike demand at ",
-                      as.character(x), ":00", spe ="")) } )
+# BikeShare$Time <- Time
+lapply(times, function(times){
+  ggplot(BikeShare[BikeShare$hr == times, ], 
+         aes(x = dteday, y = cnt)) +
+    geom_line() +
+    ylab("Log number of bikes") +
+    labs(title = paste("Bike demand at ",
+                       as.character(times), ":00", spe ="")) +
+    theme(text = element_text(size=20))
+    })
 
 ## Convert dayWeek back to an ordered factor so the plot is in
 ## time order.
 BikeShare$dayWeek <- fact.conv(BikeShare$dayWeek)
 
 ## This code gives a first look at the predictor values vs the demand for bikes.
-library(ggplot2)
 labels <- list("Box plots of hourly bike demand",
             "Box plots of monthly bike demand",
             "Box plots of bike demand by weather factor",

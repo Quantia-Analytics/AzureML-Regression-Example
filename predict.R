@@ -1,20 +1,24 @@
 ## This code will compute predictions from test data 
 ## for R models of various types. This code is 
-## intended to run in an Azure ML Execute R Script module. 
-## By changing some comments you can test the code 
-## in RStudio.
+## intended to run in an Azure ML Execute R 
+## Script module. By changing the following variable
+## you can run the code in R or RStudio for testing.
+Azure <- FALSE
 
-## Source the zipped utility file
-source("src/utilities.R")
+if(Azure){
+  ## Sourcethe zipped utility file
+  source("src/utilities.R")
+  ## Read the data frame containing the serialized 
+  ## model object.
+  modelFrame  <- maml.mapInputPort(1)
+  ## Read in the dataset. 
+  BikeShare <- maml.mapInputPort(2)
+  BikeShare$dteday <- set.asPOSIXct2(BikeShare)
+} else {
+  ## comment out the following line if running in Azure ML.
+  modelFrame <- outFrame
+}
 
-## Get the data frame with the model from port 1 
-## and the data set from port 2. These two lines 
-## will only work in Azure ML. 
-modelFrame  <- maml.mapInputPort(1)
-BikeShare <- maml.mapInputPort(2)
-
-## comment out the following line if running in Azure ML.
-#modelFrame <- outFrame
 
 ## Extract the model from the serialized input and assign 
 ## to a convenient name. 
@@ -23,10 +27,10 @@ bike.model <- modelList$bike.model
 
 ## Output a data frame with actual and values predicted 
 ## by the model.
-library(gam)
-library(randomForest)
-library(kernlab)
-library(nnet)
+require(gam)
+require(randomForest)
+require(kernlab)
+require(nnet)
 outFrame <- data.frame( actual = BikeShare$cnt,
                        predicted = 
                          predict(bike.model, 
@@ -34,4 +38,4 @@ outFrame <- data.frame( actual = BikeShare$cnt,
 
 ## The following line should be executed only when running in
 ## Azure ML Studio to output the serialized model. 
-maml.mapOutputPort('outFrame') 
+if(Azure) maml.mapOutputPort('outFrame') 

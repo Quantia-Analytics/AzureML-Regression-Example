@@ -1,51 +1,50 @@
 ## This file contains the code for the transformation 
 ## of the raw bike rental data. it is intended to run in an 
 ## Azure ML Execute R Script module. By changing
-## some comments you can test the code in RStudio 
-## reading data from a .csv file. 
+## the following vaiable to false the code will run
+## in R or RStudio.
+Azure <- FALSE
 
-## The next lines are used for testing in RStudio only.
-## These lines should be commented out and the following 
-## line should be uncommented when running in Azure ML.
-#BikeShare <- read.csv("BikeSharing.csv", sep = ",", 
-#                      header = T, stringsAsFactors = F )
-#BikeShare$dteday <- as.POSIXct(strptime(
-#                         paste(BikeShare$dteday, " ", 
-#                               "00:00:00", 
-#                               sep = ""), 
-#                         "%Y-%m-%d %H:%M:%S"))
-BikeShare <- maml.mapInputPort(1)
+## The next lines of code read in the dataset, either 
+## in Azure ML or from a csv file for testing purposes.
+if(Azure){
+  BikeShare <- maml.mapInputPort(1)
+  BikeShare$dteday <- as.POSIXct(as.integer(BikeShare$dteday), 
+                                 origin = "1970-01-01")
+}else{
+  BikeShare <- read.csv("BikeSharing.csv", sep = ",", 
+                      header = T, stringsAsFactors = F )
+  BikeShare$dteday <- as.POSIXct(strptime(
+                         paste(BikeShare$dteday, " ", 
+                               "00:00:00", 
+                               sep = ""), 
+                         "%Y-%m-%d %H:%M:%S"))
+}
 
 ## Select the columns we need
-BikeShare <- BikeShare[, c(2, 5, 6, 7, 9, 10, 
-                           11, 13, 14, 15, 16, 17)] 
+cols <- c("dteday", "mnth", "hr", "holiday",
+          "workingday", "weathersit", "temp",
+          "hum", "windspeed", "casual", 
+          "registered", "cnt")
+BikeShare <- BikeShare[, cols]
 
-## Normalize the numeric perdictors
-BikeShare[, 6:9] <- scale(BikeShare[, 6:9])  
+## Normalize the numeric perdictors 
+cols <- c("temp", "hum", "windspeed")
+BikeShare[, cols] <- scale(BikeShare[, cols])  
 
 ## Take the log of response variables. First we 
 ## must ensure there are no zero values. The difference 
 ## between 0 and 1 is inconsequential. 
-BikeShare[, 10:12] <- lapply(BikeShare[, 10:12], 
-                             function(x){ifelse(x == 0, 
-                                                1,x)})
-BikeShare[, 10:12] <- lapply(BikeShare[, 10:12], 
-                             function(x){log(x)})
+cols <- c("casual", "registered", "cnt")
+BikeShare <- var.log(BikeShare, cols)
 
 ## Create a new variable to indicate workday
 BikeShare$isWorking <- ifelse(BikeShare$workingday & 
-                                !BikeShare$holiday, 1, 0)  ## Create a new variable to indicate workday
+                                !BikeShare$holiday, 1, 0)  
 
 ## Add a column of the count of months which could 
-## help model trend. Next line is only needed running
-## in Azure ML
-Dteday <- strftime(BikeShare$dteday, 
-                   format = "%Y-%m-%dT%H:%M:%S")
-yearCount <- as.numeric(unlist(lapply(strsplit(
-                                    Dteday, "-"), 
-                                  function(x){x[1]}))) - 2011 
-                                    
-BikeShare$monthCount <- 12 * yearCount + BikeShare$mnth
+## help model trend. 
+BikeShare <- month.count(BikeShare)
 
 ## Create an ordered factor for the day of the week 
 ## starting with Monday. Note this factor is then 
@@ -72,5 +71,5 @@ BikeShare$xformHr <- ifelse(BikeShare$hr > 4,
                             BikeShare$hr - 5, 
                             BikeShare$hr + 19)
 
-## Output the transformed data frame.
-maml.mapOutputPort('BikeShare')
+## Output the transformed data frame if in Azure ML.
+if(Azure) maml.mapOutputPort('BikeShare')
