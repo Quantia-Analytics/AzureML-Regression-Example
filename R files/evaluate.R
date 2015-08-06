@@ -17,19 +17,19 @@ if(Azure){
   refFrame <- maml.mapInputPort(2)
   refFrame$dteday <- set.asPOSIXct2(refFrame)
 }else{
-  inFrame <- outFrame[, c("actual", "predicted")]
+  inFrame <- scores
   refFrame <- BikeShare
 }
 
 ## Another data frame is created from the data produced
 ## by the Azure Split module. The columns we need are 
 ## added to inFrame
-inFrame[, c("dteday", "monthCount", "hr", "xformWorkHr")] <- 
-  refFrame[, c("dteday", "monthCount", "hr", "xformWorkHr")]
+inFrame[, c("cnt", "dteday", "monthCount", "hr", "workTime")] <- 
+  refFrame[, c("cnt", "dteday", "monthCount", "hr", "workTime")]
 
 ## Assign names to the data frame for reference
-names(inFrame) <- c("cnt", "predicted", "dteday", 
-                    "monthCount", "hr", "xformWorkHr")
+names(inFrame) <- c("predicted", "cnt", "dteday", 
+                    "monthCount", "hr", "workTime")
 
 ## Since the sampling process randomized the order of 
 ## the rows sort the data by the Time object.
@@ -65,35 +65,13 @@ qqline(inFrame$resids)
 
 ## Plot the residuals by hour and transformed work hour.
 inFrame <- mutate(inFrame, fact.hr = as.factor(hr),
-                  fact.xformWorkHr = as.factor(xformWorkHr))                                  
-facts <- c("fact.hr", "fact.xformWorkHr") 
+                  fact.workTime = as.factor(workTime))                                  
+facts <- c("fact.hr", "fact.workTime") 
 lapply(facts, function(x){ 
        ggplot(inFrame, aes_string(x = x, y = "resids")) + 
          geom_boxplot( ) + 
          ggtitle("Residual of actual versus predicted bike demand by hour")})
 
 
-## First compute and display the median residual by hour
-evalFrame <- inFrame %>%
-    group_by(hr) %>%
-    summarise(medResidByHr = format(round(
-        median(predicted - cnt), 2), 
-      nsmall = 2)) 
 
-## Next compute and display the median residual by month
-tempFrame <- inFrame %>%
-    group_by(monthCount) %>%
-    summarise(medResid = median(predicted - cnt)) 
-
-evalFrame$monthCount <- tempFrame$monthCount
-evalFrame$medResidByMcnt <- format(round(
-    tempFrame$medResid, 2), 
-  nsmall = 2)
-
-print("Breakdown of residuals")
-print(evalFrame)
-
-## Output the evaluation results
-outFrame <- data.frame(evalFrame)
-if(Azure) maml.mapOutputPort('outFrame')
 

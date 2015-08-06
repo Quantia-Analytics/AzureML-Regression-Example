@@ -26,7 +26,7 @@ char.toPOSIXct <-   function(inFrame) {
 
 ## This code is intended to run in an 
 ## Azure ML Execute R Script module. By changing
-## the following vaiable to false the code will run
+## the following variable to false the code will run
 ## in R or RStudio.
 Azure <- FALSE
 

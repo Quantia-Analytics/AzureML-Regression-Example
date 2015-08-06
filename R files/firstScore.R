@@ -26,7 +26,7 @@ char.toPOSIXct <-   function(inFrame) {
 
 ## This code is intended to run in an 
 ## Azure ML Execute R Script module. By changing
-## the following vaiable to false the code will run
+## the following variable to false the code will run
 ## in R or RStudio.
 Azure <- FALSE
 
@@ -35,12 +35,8 @@ Azure <- FALSE
 if(Azure){
   BikeShare <- dataset
   BikeShare$dteday <- set.asPOSIXct(BikeShare)
-}else{
-  BikeShare <- read.csv("BikeSharing.csv", sep = ",", 
-                      header = T, stringsAsFactors = F )
-  BikeShare$dteday <- char.toPOSIXct(BikeShare)
 }
 
 require(randomForest)
-scores <- data.frame(actual = BikeShare$cnt,
-                     prediction = predict(model, newdata = BikeShare))
+scores <- data.frame(prediction = predict(model, newdata = BikeShare))
+

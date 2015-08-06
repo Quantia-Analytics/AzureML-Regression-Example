@@ -6,7 +6,7 @@
 Azure <- FALSE
 
 if(Azure){
-  ## Sourcethe zipped utility file
+  ## Source the zipped utility file
   source("src/utilities.R")
   ## Read in the dataset. 
   BikeShare <- maml.mapInputPort(1)
@@ -64,32 +64,32 @@ labels <- list("Box plots of hourly bike demand",
             "Box plots of bike demand by day of the week")
 xAxis <- list("hr", "mnth", "weathersit", 
               "isWorking", "dayWeek")
-capture.output( Map(function(X, label){ 
+Map(function(X, label){ 
       ggplot(BikeShare, aes_string(x = X, 
                                    y = "cnt", 
                                   group = X)) + 
       geom_boxplot( ) + ggtitle(label) +
                            theme(text = 
                                    element_text(size=18)) },
-    xAxis, labels),
-  file = "NUL" )
+    xAxis, labels)
 
 ## Look at the relationship between predictors and bike demand
 labels <- c("Bike demand vs temperature",
             "Bike demand vs humidity",
             "Bike demand vs windspeed",
             "Bike demand vs hr",
-            "Bike demand vs xformHr")
-xAxis <- c("temp", "hum", "windspeed", "hr", "xformHr")
-capture.output( Map(function(X, label){ 
+            "Bike demand vs xformHr",
+            "Bike demand vs xformWorkHr")
+xAxis <- c("temp", "hum", "windspeed", "hr", 
+           "xformHr", "xformWorkHr")
+Map(function(X, label){ 
       ggplot(BikeShare, aes_string(x = X, y = "cnt")) + 
       geom_point(aes_string(colour = "cnt"), alpha = 0.1) + 
       scale_colour_gradient(low = "green", high = "blue") + 
       geom_smooth(method = "loess") + 
       ggtitle(label) +
       theme(text = element_text(size=20)) },
-    xAxis, labels), 
-  file = "NUL" )
+    xAxis, labels)
 
 
 ## Explore the interaction between time of day
@@ -97,11 +97,23 @@ capture.output( Map(function(X, label){
 labels <- list("Box plots of bike demand at 0900 for \n working and non-working days",
                "Box plots of bike demand at 1800 for \n working and non-working days")
 Times <- list(8, 17)
-capture.output( Map(function(time, label){ 
+Map(function(time, label){ 
       ggplot(BikeShare[BikeShare$hr == time, ], 
          aes(x = isWorking, y = cnt, group = isWorking)) + 
       geom_boxplot( ) + ggtitle(label) +
       theme(text = element_text(size=18)) },
-    Times, labels),
-  file = "NUL" )
+    Times, labels)
 
+## Explore the interaction between time of day
+## and working or non-working days.
+labels <- list("Box plots of bike demand at 0900 for \n working and non-working days",
+               "Box plots of bike demand at 1800 for \n working and non-working days")
+Times <- list(8, 17)
+
+plot.box2 <- function(time, label){ 
+  ggplot(BikeShare[BikeShare$hr == time, ], 
+         aes(x = isWorking, y = cnt, group = isWorking)) + 
+    geom_boxplot( ) + ggtitle(label) +
+    theme(text = element_text(size=18)) }
+
+Map(plot.box2, Times, labels)

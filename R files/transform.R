@@ -13,7 +13,8 @@ if(Azure){
   BikeShare <- maml.mapInputPort(1)
   BikeShare$dteday <- set.asPOSIXct(BikeShare)
 }else{
-  BikeShare <- read.csv("BikeSharing.csv", sep = ",", 
+  BikeShare <- read.csv("C:\\Users\\Steve\\GIT\\Quantia-Analytics\\AzureML-Regression-Example\\R files\\BikeSharing.csv", 
+                        sep = ",", 
                         header = T, stringsAsFactors = F )
   
   ## Select the columns we need
@@ -69,6 +70,5 @@ BikeShare$xformWorkHr <- ifelse(BikeShare$isWorking,
                              BikeShare$xformHr + 24) 
 
 ## Output the transformed data frame if in Azure ML.
-if(Azure) {
-  maml.mapOutputPort('BikeShare')
-} 
+if(Azure) maml.mapOutputPort('BikeShare')
+ 
