@@ -11,8 +11,8 @@ def azureml_main(BikeShare):
     from sklearn import linear_model
     import pandas as pd
     
-    cols = ['temp', 'hum', 'xformWorkHr', 'dayCount']
-    X = BikeShare[['temp', 'hum', 'xformWorkHr', 'dayCount']].as_matrix()
+    cols = ['temp', 'hum', 'xformWorkHr', 'dayCount', 'mnth']
+    X = BikeShare[cols].as_matrix()
     Y = BikeShare['cnt'].as_matrix()
     ## Compute the linear model.
     clf = linear_model.LinearRegression()
