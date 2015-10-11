@@ -10,7 +10,6 @@ coeficients.
 """
 
 def azureml_main(BikeShare, coefs):
-#    import pandas as pd
     import numpy as np
         
     arr1 = BikeShare[coefs.iloc[1:, 0]].as_matrix()

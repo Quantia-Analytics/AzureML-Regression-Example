@@ -33,6 +33,9 @@ def azureml_main(BikeShare):
 
     ## Remove the unneeded column and restore the original column names. 
     BikeShare.drop('cnt_y', axis = 1, inplace = True)
-    BikeShare.columns = in_names       
+    BikeShare.columns = in_names  
+
+    ## Sort the data frame based on the dayCount
+    BikeShare.sort('dayCount',  axis = 0, inplace = True)     
     
     return BikeShare
