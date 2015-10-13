@@ -32,15 +32,16 @@ def set_day(df):
     
     
 def azureml_main(BikeShare):
+    import matplotlib
+    matplotlib.use('agg')  # Set backend
+    matplotlib.rcParams.update({'font.size': 20})
+    
     from sklearn import preprocessing
     import numpy as np
     import matplotlib.pyplot as plt
     import statsmodels.graphics.correlation as pltcor
     import statsmodels.nonparametric.smoothers_lowess as lw
 
-## Set the font size for the plots    
-    import matplotlib
-    matplotlib.rcParams.update({'font.size': 20})
     
     Azure = False
     
@@ -70,6 +71,7 @@ def azureml_main(BikeShare):
         plt.ylabel("Count of bikes rented")
         plt.title("Bikes rented by days for hour = " + str(tm))
         plt.show()
+        if(Azure == True): fig.savefig('tsplot' + str(tm) + '.png')
  
 ## Boxplots to for the predictor values vs the demand for bikes.
     BikeShare = set_day(BikeShare)
@@ -88,6 +90,7 @@ def azureml_main(BikeShare):
         plt.xlabel('')
         plt.ylabel('Number of bikes')
         plt.show() 
+        if(Azure == True): fig.savefig('boxplot' + xaxs + '.png')
         
 ## Make scater plot of bike demand vs. various features.
         
@@ -110,6 +113,7 @@ def azureml_main(BikeShare):
         BikeShare.plot(kind = 'scatter', x = xaxs, y = 'cnt', ax = ax, alpha = 0.05)
         plt.plot(los[:, 0], los[:, 1], axes = ax, color = 'red')
         plt.show() 
+        if(Azure == True): fig.savefig('scatterplot' + xaxs + '.png')
     
 ## Explore bike demand for certain times on working and nonworking days
     labels = ["Boxplots of bike demand at 0900 \n\n",
@@ -125,6 +129,7 @@ def azureml_main(BikeShare):
         plt.ylabel('Number of bikes')
         plt.title(lab)
         plt.show() 
+        if(Azure == True): fig.savefig('timeplot' + str(tms) + '.png')
 
     return BikeShare    
 
