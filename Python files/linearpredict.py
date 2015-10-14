@@ -15,7 +15,7 @@ def azureml_main(BikeShare, coefs):
     arr1 = BikeShare[coefs.iloc[1:, 0]].as_matrix()
     arr2 = coefs.iloc[1:, 1].as_matrix()   
     
-    BikeShare['Scored Labels'] = np.dot(arr1, arr2) + coefs.iloc[0, 1]
+    BikeShare['Scored Label Mean'] = np.dot(arr1, arr2) + coefs.iloc[0, 1]
     
     return BikeShare
 

@@ -9,17 +9,17 @@ regression model.
 """
 
 def azureml_main(BikeShare):
+    import matplotlib
+    matplotlib.use('agg')  # Set backend
+    matplotlib.rcParams.update({'font.size': 20})
+    
     import matplotlib.pyplot as plt
     import statsmodels.api as sm
-
-## Set the font size for the plots    
-    import matplotlib
-    matplotlib.rcParams.update({'font.size': 20})
     
     Azure = False
 
 ## Compute the residuals.
-    BikeShare['Resids'] = BikeShare['Scored Labels'] - BikeShare['cnt']   
+    BikeShare['Resids'] = BikeShare['Scored Label Mean'] - BikeShare['cnt']   
     
 ## Plot the residuals vs the label, the count of rented bikes.
     fig = plt.figure(figsize=(8, 6))
@@ -32,6 +32,7 @@ def azureml_main(BikeShare):
     plt.ylabel("Residual")
     plt.title("Residuals vs time")
     plt.show()
+    if(Azure == True): fig.savefig('scatter1.png')
     
 
 ## Make time series plots of actual bike demand and 
@@ -45,12 +46,13 @@ def azureml_main(BikeShare):
                                            x = 'dayCount', y = 'cnt',
                                            ax = ax)          
         BikeShare[BikeShare.hr == tm].plot(kind = 'line', 
-                                           x = 'dayCount', y = 'Scored Labels',
+                                           x = 'dayCount', y = 'Scored Label Mean',
                                            color = 'red', ax = ax)                                    
         plt.xlabel("Days from start of plot")
         plt.ylabel("Count of bikes rented")
         plt.title("Bikes rented by days for hour = " + str(tm))
         plt.show()
+        if(Azure == True): fig.savefig('tsplot' + str(tm) + '.png')
  
 ## Boxplots to for the residuals by hour and transformed hour.
     labels = ["Box plots of residuals by hour of the day \n\n",
@@ -64,6 +66,7 @@ def azureml_main(BikeShare):
         plt.xlabel('')
         plt.ylabel('Residuals')
         plt.show() 
+        if(Azure == True): fig.savefig('boxplot' + xaxs + '.png')
      
 ## QQ Normal plot of residuals    
     fig = plt.figure(figsize = (6,6))
@@ -72,6 +75,7 @@ def azureml_main(BikeShare):
     sm.qqplot(BikeShare['Resids'], ax = ax)
     ax.set_title('QQ Normal plot of residuals')
     if(Azure == True): fig.savefig('QQ.png')
+    if(Azure == True): fig.savefig('QQ1.png')
 
 ## Histograms of the residuals
     fig = plt.figure(figsize = (8,6))

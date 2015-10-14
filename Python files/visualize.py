@@ -41,9 +41,11 @@ def azureml_main(BikeShare):
     import matplotlib.pyplot as plt
     import statsmodels.graphics.correlation as pltcor
     import statsmodels.nonparametric.smoothers_lowess as lw
-
     
     Azure = False
+    
+    ## Sort the data frame based on the dayCount
+    BikeShare.sort('dayCount',  axis = 0, inplace = True)       
     
     arry = BikeShare.drop('dteday', axis = 1).as_matrix()  
     arry = preprocessing.scale(arry, axis = 1)
@@ -79,9 +81,10 @@ def azureml_main(BikeShare):
             "Box plots of monthly bike demand",
             "Box plots of bike demand by weather factor",
             "Box plots of bike demand by workday vs. holiday",
-            "Box plots of bike demand by day of the week"]
+            "Box plots of bike demand by day of the week",
+            "Box plots by transformed work hour of the day"]
     xAxes = ["hr", "mnth", "weathersit", 
-              "isWorking", "dayWeek"]
+              "isWorking", "dayWeek", "xformWorkHr"]
     for lab, xaxs in zip(labels, xAxes):
         fig = plt.figure(figsize=(10, 6))
         fig.clf()

@@ -56,7 +56,7 @@ def azureml_main(BikeShare):
     isWorking = BikeShare['isWorking'].as_matrix()
     BikeShare['xformWorkHr'] = np.where(isWorking, 
                                         BikeShare.xformHr, 
-                                        BikeShare.xformHr + 24)
+                                        BikeShare.xformHr + 24.0)
                                         
     BikeShare['dayCount'] = pd.Series(range(BikeShare.shape[0]))/24
                                        
