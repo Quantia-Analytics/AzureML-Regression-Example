@@ -22,7 +22,6 @@ def set_day(df):
     for day in df.dteday:
         if(cur_day != day): 
             cur_day = day
-#            i = lambda i: retun 0 if i == 6 else retun i + 1
             if(i == 6): i = 0
             else: i += 1 
         temp[indx] = days[i]
@@ -37,6 +36,7 @@ def azureml_main(BikeShare):
     matplotlib.rcParams.update({'font.size': 20})
     
     from sklearn import preprocessing
+    from sklearn import linear_model
     import numpy as np
     import matplotlib.pyplot as plt
     import statsmodels.graphics.correlation as pltcor
@@ -46,8 +46,20 @@ def azureml_main(BikeShare):
     
     ## Sort the data frame based on the dayCount
     BikeShare.sort('dayCount',  axis = 0, inplace = True)       
+
+    ## De-trend the bike demand with time.
+    nrow = BikeShare.shape[0]
+    X = BikeShare.dayCount.as_matrix().reshape((nrow,1))
+    Y = BikeShare.cnt.as_matrix()
+    ## Compute the linear model.
+    clf = linear_model.LinearRegression()
+    bike_lm = clf.fit(X, Y)
+    ## Remove the trend
+    BikeShare.cnt = BikeShare.cnt - bike_lm.predict(X)
     
-    arry = BikeShare.drop('dteday', axis = 1).as_matrix()  
+    ## Compute the correlation matrix and set the diagonal 
+    ## elements to 0.
+    arry = BikeShare.drop('dteday', axis = 1).as_matrix()       
     arry = preprocessing.scale(arry, axis = 1)
     corrs = np.corrcoef(arry, rowvar = 0)
     np.fill_diagonal(corrs, 0)
@@ -58,6 +70,36 @@ def azureml_main(BikeShare):
     pltcor.plot_corr(corrs, xnames = col_nms, ax = ax) 
     plt.show()
     if(Azure == True): fig.savefig('cor1.png')
+    
+    ## Compute and plot the correlation matrix with
+    ## a subset of columns.
+    cols = ['yr', 'mnth', 'isWorking', 'hr', 'xformWorkHr', 'dayCount',
+            'weathersit', 'temp', 'hum', 'windspeed', 'cnt']
+    arry = BikeShare[cols].as_matrix()        
+    arry = preprocessing.scale(arry, axis = 1)
+    corrs = np.corrcoef(arry, rowvar = 0)
+    np.fill_diagonal(corrs, 0)
+     
+    fig = plt.figure(figsize = (9,9))
+    ax = fig.gca()
+    pltcor.plot_corr(corrs, xnames = cols, ax = ax) 
+    plt.show()
+    if(Azure == True): fig.savefig('cor2.png')
+    
+    ## Compute and plot the correlation matrix with
+    ## a smaller subset of columns.
+    cols = ['yr', 'isWorking', 'xformWorkHr', 'dayCount',
+            'temp', 'hum', 'windspeed', 'cnt']
+    arry = BikeShare[cols].as_matrix()        
+    arry = preprocessing.scale(arry, axis = 1)
+    corrs = np.corrcoef(arry, rowvar = 0)
+    np.fill_diagonal(corrs, 0)
+     
+    fig = plt.figure(figsize = (9,9))
+    ax = fig.gca()
+    pltcor.plot_corr(corrs, xnames = cols, ax = ax) 
+    plt.show()
+    if(Azure == True): fig.savefig('cor2.png')
     
 
 ## Make time series plots of bike demand by times of the day.    
