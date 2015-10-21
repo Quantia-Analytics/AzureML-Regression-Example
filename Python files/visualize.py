@@ -72,23 +72,8 @@ def azureml_main(BikeShare):
     if(Azure == True): fig.savefig('cor1.png')
     
     ## Compute and plot the correlation matrix with
-    ## a subset of columns.
-    cols = ['yr', 'mnth', 'isWorking', 'hr', 'xformWorkHr', 'dayCount',
-            'weathersit', 'temp', 'hum', 'windspeed', 'cnt']
-    arry = BikeShare[cols].as_matrix()        
-    arry = preprocessing.scale(arry, axis = 1)
-    corrs = np.corrcoef(arry, rowvar = 0)
-    np.fill_diagonal(corrs, 0)
-     
-    fig = plt.figure(figsize = (9,9))
-    ax = fig.gca()
-    pltcor.plot_corr(corrs, xnames = cols, ax = ax) 
-    plt.show()
-    if(Azure == True): fig.savefig('cor2.png')
-    
-    ## Compute and plot the correlation matrix with
     ## a smaller subset of columns.
-    cols = ['yr', 'isWorking', 'xformWorkHr', 'dayCount',
+    cols = ['yr', 'mnth', 'isWorking', 'xformWorkHr', 'dayCount',
             'temp', 'hum', 'windspeed', 'cnt']
     arry = BikeShare[cols].as_matrix()        
     arry = preprocessing.scale(arry, axis = 1)
