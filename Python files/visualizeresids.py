@@ -18,6 +18,9 @@ def azureml_main(BikeShare):
     
     Azure = False
 
+## Sort the data frame based on the dayCount
+    BikeShare.sort('dayCount',  axis = 0, inplace = True) 
+
 ## Compute the residuals.
     BikeShare['Resids'] = BikeShare['Scored Label Mean'] - BikeShare['cnt']   
     
@@ -26,11 +29,11 @@ def azureml_main(BikeShare):
     fig.clf()
     ax = fig.gca()
 ## PLot the residuals.    
-    BikeShare.plot(kind = 'scatter', x = 'dayCount', y = 'Resids', 
+    BikeShare.plot(kind = 'scatter', x = 'cnt', y = 'Resids', 
                    alpha = 0.05, color = 'red', ax = ax)              
-    plt.xlabel("Days from start")
+    plt.xlabel("Bike demand")
     plt.ylabel("Residual")
-    plt.title("Residuals vs time")
+    plt.title("Residuals vs demand")
     plt.show()
     if(Azure == True): fig.savefig('scatter1.png')
     
